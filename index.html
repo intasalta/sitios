@@ -61,7 +61,7 @@
   </header>
 
   <!-- CONTENIDO PRINCIPAL -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6">
 
     <!-- BANNER Y PRESENTACIÓN -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60">
@@ -73,6 +73,25 @@
         <i data-feather="grid" class="h-4 w-4"></i>
         Directorio Central
       </div>
+    </div>
+
+    <!-- BOTONES DE FILTRADO POR CATEGORÍA -->
+    <div class="flex flex-wrap items-center gap-2 pb-2">
+      <button onclick="filtrarCategoria('Todas')" class="btn-filtro active-filter px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-sky-600 text-white border-sky-600 shadow-sm" data-cat="Todas">
+        Todas
+      </button>
+      <button onclick="filtrarCategoria('SIG & Mapas')" class="btn-filtro px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sky-500" data-cat="SIG & Mapas">
+        SIG & Mapas
+      </button>
+      <button onclick="filtrarCategoria('Agua')" class="btn-filtro px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sky-500" data-cat="Agua">
+        Agua
+      </button>
+      <button onclick="filtrarCategoria('Ambiente')" class="btn-filtro px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sky-500" data-cat="Ambiente">
+        Ambiente
+      </button>
+      <button onclick="filtrarCategoria('Meteorología')" class="btn-filtro px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sky-500" data-cat="Meteorología">
+        Meteorología
+      </button>
     </div>
 
     <!-- GRILLA DE TARJETAS (CAJITAS DE ENLACES) -->
@@ -92,7 +111,7 @@
       </button>
 
       <!-- Encabezado del Modal -->
-      <flex class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-3 mb-4">
         <div class="p-3 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl">
           <i data-feather="help-circle" class="h-6 w-6"></i>
         </div>
@@ -100,7 +119,7 @@
           <h3 class="text-xl font-bold text-slate-900 dark:text-white">Acerca del Portal</h3>
           <p class="text-xs text-slate-500 dark:text-slate-400">INTA Centro Regional Salta-Jujuy</p>
         </div>
-      </flex>
+      </div>
 
       <!-- Contenido explicativo -->
       <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -192,8 +211,8 @@
       },
       {
         nombre: 'Visor Desmontes',
-        descripcion: '1976  a la Actualidad',
-        icono: 'tree-pine', // Usa 'image' o 'activity' en feather icons
+        descripcion: '1976 a la Actualidad',
+        icono: 'tree-pine',
         iconoFeather: 'activity', 
         url: 'https://intasalta.github.io/desmontes/',
         categoria: 'Ambiente'
@@ -207,43 +226,79 @@
       }
     ];
 
-    // RENDERIZAR TARJETAS
     const gridContainer = document.getElementById('grid-herramientas');
 
-    paginas.forEach(item => {
-      const cardHTML = `
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700/60 flex flex-col justify-between hover:shadow-lg hover:border-sky-500/50 transition-all group">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="p-3 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl group-hover:bg-sky-600 group-hover:text-white transition-all">
-                <i data-feather="${item.iconoFeather || item.icono}" class="h-6 w-6"></i>
-              </div>
-              <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300">
-                ${item.categoria}
-              </span>
-            </div>
-            
-            <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-              ${item.nombre}
-            </h3>
-            
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
-              ${item.descripcion}
-            </p>
+    // RENDERIZAR TARJETAS SEGÚN CATEGORÍA
+    function renderizarTarjetas(categoriaFiltrada = 'Todas') {
+      gridContainer.innerHTML = '';
+
+      const filtradas = categoriaFiltrada === 'Todas' 
+        ? paginas 
+        : paginas.filter(item => item.categoria === categoriaFiltrada);
+
+      if (filtradas.length === 0) {
+        gridContainer.innerHTML = `
+          <div class="col-span-full text-center py-12 text-slate-400">
+            No hay herramientas disponibles en esta categoría.
           </div>
+        `;
+        return;
+      }
 
-          <a href="${item.url}" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-100 hover:bg-sky-600 dark:bg-slate-700/50 dark:hover:bg-sky-600 text-slate-700 hover:text-white dark:text-slate-200 dark:hover:text-white font-semibold text-xs rounded-xl transition-all shadow-sm">
-            <span>Abrir enlace</span>
-            <i data-feather="external-link" class="h-3.5 w-3.5"></i>
-          </a>
-        </div>
-      `;
-      gridContainer.insertAdjacentHTML('beforeend', cardHTML);
-    });
+      filtradas.forEach(item => {
+        const cardHTML = `
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700/60 flex flex-col justify-between hover:shadow-lg hover:border-sky-500/50 transition-all group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl group-hover:bg-sky-600 group-hover:text-white transition-all">
+                  <i data-feather="${item.iconoFeather || item.icono}" class="h-6 w-6"></i>
+                </div>
+                <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300">
+                  ${item.categoria}
+                </span>
+              </div>
+              
+              <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                ${item.nombre}
+              </h3>
+              
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                ${item.descripcion}
+              </p>
+            </div>
 
-    // INICIALIZAR FEATHER ICONS Y MODO OSCURO
-    feather.replace();
+            <a href="${item.url}" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-100 hover:bg-sky-600 dark:bg-slate-700/50 dark:hover:bg-sky-600 text-slate-700 hover:text-white dark:text-slate-200 dark:hover:text-white font-semibold text-xs rounded-xl transition-all shadow-sm">
+              <span>Abrir enlace</span>
+              <i data-feather="external-link" class="h-3.5 w-3.5"></i>
+            </a>
+          </div>
+        `;
+        gridContainer.insertAdjacentHTML('beforeend', cardHTML);
+      });
 
+      // Re-renderizar íconos Feather tras actualizar el DOM
+      feather.replace();
+    }
+
+    // FUNCIÓN DE FILTRADO Y CAMBIO DE ESTILOS DE BOTÓN
+    function filtrarCategoria(categoria) {
+      const botones = document.querySelectorAll('.btn-filtro');
+
+      botones.forEach(btn => {
+        if (btn.getAttribute('data-cat') === categoria) {
+          btn.className = "btn-filtro px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-sky-600 text-white border-sky-600 shadow-sm";
+        } else {
+          btn.className = "btn-filtro px-4 py-2 rounded-xl text-xs font-semibold border transition-all bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sky-500";
+        }
+      });
+
+      renderizarTarjetas(categoria);
+    }
+
+    // CARGA INICIAL
+    renderizarTarjetas('Todas');
+
+    // MODO OSCURO
     const themeToggleBtn = document.getElementById('theme-toggle');
     const darkIcon = document.getElementById('theme-toggle-dark-icon');
     const lightIcon = document.getElementById('theme-toggle-light-icon');
