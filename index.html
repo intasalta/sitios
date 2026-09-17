@@ -186,7 +186,8 @@
         descripcion: 'Visor geográfico interactivo.',
         icono: 'map',
         url: 'https://intasalta.github.io/visor-inta/?zoom=4&lat=-40&lng=-59',
-        categoria: 'SIG & Mapas'
+        categoria: 'SIG & Mapas',
+        requiereAdvertencia: true
       },
       {
         nombre: 'Datos Agrometeorológicos',
@@ -229,56 +230,72 @@
     const gridContainer = document.getElementById('grid-herramientas');
 
     // RENDERIZAR TARJETAS SEGÚN CATEGORÍA
-    function renderizarTarjetas(categoriaFiltrada = 'Todas') {
-      gridContainer.innerHTML = '';
-
-      const filtradas = categoriaFiltrada === 'Todas' 
-        ? paginas 
-        : paginas.filter(item => item.categoria === categoriaFiltrada);
-
-      if (filtradas.length === 0) {
-        gridContainer.innerHTML = `
-          <div class="col-span-full text-center py-12 text-slate-400">
-            No hay herramientas disponibles en esta categoría.
-          </div>
-        `;
-        return;
-      }
-
-      filtradas.forEach(item => {
-        const cardHTML = `
-          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700/60 flex flex-col justify-between hover:shadow-lg hover:border-sky-500/50 transition-all group">
-            <div>
-              <div class="flex items-center justify-between mb-4">
-                <div class="p-3 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl group-hover:bg-sky-600 group-hover:text-white transition-all">
-                  <i data-feather="${item.iconoFeather || item.icono}" class="h-6 w-6"></i>
-                </div>
-                <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300">
-                  ${item.categoria}
-                </span>
-              </div>
-              
-              <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                ${item.nombre}
-              </h3>
-              
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
-                ${item.descripcion}
-              </p>
-            </div>
-
-            <a href="${item.url}" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-100 hover:bg-sky-600 dark:bg-slate-700/50 dark:hover:bg-sky-600 text-slate-700 hover:text-white dark:text-slate-200 dark:hover:text-white font-semibold text-xs rounded-xl transition-all shadow-sm">
-              <span>Abrir enlace</span>
-              <i data-feather="external-link" class="h-3.5 w-3.5"></i>
-            </a>
-          </div>
-        `;
-        gridContainer.insertAdjacentHTML('beforeend', cardHTML);
-      });
-
-      // Re-renderizar íconos Feather tras actualizar el DOM
-      feather.replace();
+    // Función para manejar la navegación con advertencia si aplica
+function abrirEnlace(url, requiereAdvertencia) {
+  if (requiereAdvertencia) {
+    const confirmacion = confirm(
+      "ADVERTENCIA:\nEsta aplicación requiere estar dentro de la red interna de INTA para funcionar correctamente.\n\n¿Deseas continuar de todos modos?"
+    );
+    if (!confirmacion) {
+      return; // El usuario canceló la acción
     }
+  }
+  window.open(url, '_blank');
+}
+
+// RENDERIZAR TARJETAS SEGÚN CATEGORÍA
+function renderizarTarjetas(categoriaFiltrada = 'Todas') {
+  gridContainer.innerHTML = '';
+
+  const filtradas = categoriaFiltrada === 'Todas' 
+    ? paginas 
+    : paginas.filter(item => item.categoria === categoriaFiltrada);
+
+  if (filtradas.length === 0) {
+    gridContainer.innerHTML = `
+      <div class="col-span-full text-center py-12 text-slate-400">
+        No hay herramientas disponibles en esta categoría.
+      </div>
+    `;
+    return;
+  }
+
+  filtradas.forEach(item => {
+    const esAdvertencia = Boolean(item.requiereAdvertencia);
+
+    const cardHTML = `
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700/60 flex flex-col justify-between hover:shadow-lg hover:border-sky-500/50 transition-all group">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-xl group-hover:bg-sky-600 group-hover:text-white transition-all">
+              <i data-feather="${item.iconoFeather || item.icono}" class="h-6 w-6"></i>
+            </div>
+            <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300">
+              ${item.categoria}
+            </span>
+          </div>
+          
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+            ${item.nombre}
+          </h3>
+          
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+            ${item.descripcion}
+          </p>
+        </div>
+
+        <button onclick="abrirEnlace('${item.url}', ${esAdvertencia})" class="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-100 hover:bg-sky-600 dark:bg-slate-700/50 dark:hover:bg-sky-600 text-slate-700 hover:text-white dark:text-slate-200 dark:hover:text-white font-semibold text-xs rounded-xl transition-all shadow-sm">
+          <span>Abrir enlace</span>
+          <i data-feather="external-link" class="h-3.5 w-3.5"></i>
+        </button>
+      </div>
+    `;
+    gridContainer.insertAdjacentHTML('beforeend', cardHTML);
+  });
+
+  // Re-renderizar íconos Feather tras actualizar el DOM
+  feather.replace();
+}
 
     // FUNCIÓN DE FILTRADO Y CAMBIO DE ESTILOS DE BOTÓN
     function filtrarCategoria(categoria) {
